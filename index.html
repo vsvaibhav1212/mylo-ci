@@ -1,0 +1,814 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mylo Competitive Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,600;0,700;0,800;0,900;1,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal:#1C5E6B; --coral:#EF4D5D; --cyan:#A3E2ED; --peach:#FDE8D5;
+  --ink:#16323a; --muted:#5d7780;
+  --teal-soft:#e7f3f5; --line:#dce8ea; --card:#ffffff; --bg:#f4f9fa;
+  --pos:#1C5E6B; --neg:#EF4D5D;
+  --shadow:0 1px 2px rgba(22,50,58,.06),0 8px 24px rgba(22,50,58,.08);
+  --shadow-lift:0 8px 18px rgba(22,50,58,.12),0 20px 48px rgba(22,50,58,.16);
+  --r:16px; --r-sm:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:"Nunito",system-ui,sans-serif;font-weight:600;color:var(--ink);
+  background:
+    radial-gradient(1200px 600px at 80% -10%, var(--peach) 0%, transparent 55%),
+    radial-gradient(1100px 700px at -10% 10%, var(--teal-soft) 0%, transparent 50%),
+    var(--bg);
+  min-height:100vh;-webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{margin:0;font-weight:900;letter-spacing:-.01em;line-height:1.1}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--coral);outline-offset:2px;border-radius:6px}
+
+/* ---------- LANDING ---------- */
+#landing{
+  position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:24px;
+  background:
+    radial-gradient(1000px 600px at 50% -10%, var(--peach) 0%, transparent 55%),
+    radial-gradient(900px 700px at 12% 110%, var(--cyan) 0%, transparent 45%),
+    var(--bg);
+  transition:opacity .5s ease, visibility .5s ease;
+}
+#landing.hide{opacity:0;visibility:hidden;pointer-events:none}
+.radar{width:170px;height:170px;margin-bottom:18px}
+.radar circle{fill:none;stroke:var(--teal);stroke-opacity:.28}
+.radar .core{fill:var(--teal)}
+.radar .sweep{transform-origin:100px 100px;animation:spin 4s linear infinite}
+.radar .blip{fill:var(--coral);opacity:0;animation:blip 4s linear infinite}
+.radar .b2{animation-delay:1.3s}.radar .b3{animation-delay:2.6s}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes blip{0%,100%{opacity:0}10%{opacity:1}40%{opacity:0}}
+.welcome-kicker{font-weight:800;color:var(--teal);letter-spacing:.16em;text-transform:uppercase;font-size:13px;margin-bottom:10px}
+#landing h1{font-size:clamp(30px,5vw,52px);max-width:14ch}
+#landing p.sub{color:var(--muted);font-size:clamp(15px,2vw,19px);margin:14px 0 36px;font-weight:700;max-width:52ch}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(210px,260px));gap:20px;width:100%;max-width:880px}
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:26px 22px;text-align:left;box-shadow:var(--shadow);
+  transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s,border-color .35s;
+  opacity:0;transform:translateY(16px);
+}
+.card.in{opacity:1;transform:none}
+.card:hover{transform:translateY(-8px);box-shadow:var(--shadow-lift);border-color:var(--cyan)}
+.card .ic{width:48px;height:48px;border-radius:13px;display:grid;place-items:center;margin-bottom:16px;background:var(--teal-soft)}
+.card .ic svg{width:26px;height:26px;stroke:var(--teal);fill:none;stroke-width:2.1}
+.card h3{font-size:20px;margin-bottom:7px}
+.card p{margin:0;color:var(--muted);font-size:14px;font-weight:700;line-height:1.45}
+.card .go{margin-top:16px;font-weight:800;color:var(--coral);font-size:14px;display:flex;align-items:center;gap:6px}
+.card:nth-child(2){transition-delay:.08s}
+.card:nth-child(3){transition-delay:.16s}
+
+/* ---------- APP SHELL ---------- */
+#app{display:none;min-height:100vh;flex-direction:column}
+#app.show{display:flex}
+.topbar{
+  position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;
+  padding:12px 20px;background:rgba(255,255,255,.86);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.home-btn{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--teal);padding:8px 12px;border-radius:10px;transition:background .2s}
+.home-btn:hover{background:var(--teal-soft)}
+.home-btn svg{width:18px;height:18px;stroke:var(--teal);fill:none;stroke-width:2.2}
+.mode-title{font-weight:900;font-size:18px;white-space:nowrap}
+.mode-dot{width:9px;height:9px;border-radius:50%;background:var(--coral);display:inline-block;margin-right:8px;vertical-align:middle}
+.spacer{flex:1}
+.search{position:relative;min-width:200px}
+.search input{
+  width:240px;max-width:46vw;padding:10px 14px 10px 38px;border:1px solid var(--line);
+  border-radius:11px;background:#fff;font-family:inherit;font-weight:700;font-size:14px;color:var(--ink);
+}
+.search input::placeholder{color:var(--muted)}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2.2}
+.updated{font-size:12px;color:var(--muted);font-weight:700;white-space:nowrap}
+
+.tabs{display:flex;gap:4px;padding:0 20px;background:rgba(255,255,255,.6);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:14px 16px;font-weight:800;color:var(--muted);position:relative;white-space:nowrap;font-size:14.5px;transition:color .2s}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--teal)}
+.tab.active::after{content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:3px;background:var(--coral);border-radius:3px 3px 0 0}
+
+.view{padding:26px 20px 60px;max-width:1180px;margin:0 auto;width:100%}
+.pane{display:none}
+.pane.active{display:block;animation:fadeUp .45s cubic-bezier(.2,.8,.2,1) both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.pane-head{margin-bottom:18px}
+.pane-head h2{font-size:24px}
+.pane-head p{margin:6px 0 0;color:var(--muted);font-weight:700;font-size:14px}
+
+/* KPI tiles */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+.kpi .lbl{color:var(--muted);font-weight:800;font-size:12.5px;text-transform:uppercase;letter-spacing:.05em}
+.kpi .val{font-size:32px;font-weight:900;margin-top:8px;color:var(--teal);line-height:1}
+.kpi .sub{color:var(--muted);font-weight:700;font-size:12.5px;margin-top:6px}
+
+.section-title{font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:8px 0 14px}
+
+/* peer callout */
+.peers{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.peer{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--coral);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+.peer .nm{font-weight:900;font-size:17px}
+.peer .meta{color:var(--muted);font-weight:700;font-size:13px;margin-top:3px}
+.peer .row{display:flex;justify-content:space-between;margin-top:12px;font-size:13.5px}
+.peer .row b{font-weight:900}
+
+/* tables */
+.tbl-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:13px 14px;text-align:left;white-space:nowrap}
+th{font-weight:900;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--line);cursor:pointer;user-select:none;position:sticky;top:0;background:#fbfdfd}
+th.num,td.num{text-align:right}
+th .arr{opacity:.4;font-size:10px;margin-left:3px}
+th.sorted .arr{opacity:1;color:var(--teal)}
+tbody tr{border-bottom:1px solid var(--line);transition:background .15s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--teal-soft)}
+.cell-co{font-weight:800}
+.tick{color:var(--muted);font-weight:700;font-size:11.5px}
+.pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:800}
+.pill.peer{background:#fde1e4;color:#b32230}
+.pill.d2c{background:var(--teal-soft);color:var(--teal)}
+.pill.platform{background:var(--peach);color:#9a5a22}
+.pos{color:var(--pos);font-weight:900}
+.neg{color:var(--neg);font-weight:900}
+.chip{display:inline-block;padding:3px 9px;border-radius:7px;font-size:11.5px;font-weight:800}
+.chip.profit{background:#dff0ec;color:var(--teal)}
+.chip.loss{background:#fde1e4;color:#b32230}
+
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.fbtn{padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:800;font-size:13px;color:var(--muted);transition:all .2s}
+.fbtn:hover{border-color:var(--cyan)}
+.fbtn.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+
+/* bar charts */
+.bars{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px;box-shadow:var(--shadow);margin-bottom:22px}
+.barrow{display:grid;grid-template-columns:130px 1fr 92px;align-items:center;gap:12px;margin:11px 0}
+.barrow .nm{font-weight:800;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track{background:var(--bg);border-radius:8px;height:26px;overflow:hidden;position:relative}
+.fill{height:100%;width:0;border-radius:8px;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.fill.teal{background:linear-gradient(90deg,var(--teal),#2d7d8d)}
+.fill.coral{background:linear-gradient(90deg,var(--coral),#f4727f)}
+.fill.cyan{background:linear-gradient(90deg,#5cc3d6,var(--cyan))}
+.barval{font-weight:900;font-size:13.5px;text-align:right}
+.legend{display:flex;gap:18px;margin-top:6px;font-size:12.5px;font-weight:800;color:var(--muted)}
+.legend i{width:12px;height:12px;border-radius:4px;display:inline-block;margin-right:6px;vertical-align:middle}
+
+/* listing scorecard */
+.score{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px;box-shadow:var(--shadow)}
+.scorerow{display:grid;grid-template-columns:130px 1fr 120px;align-items:center;gap:12px;margin:14px 0}
+.scoretrack{position:relative;height:30px;background:var(--bg);border-radius:8px}
+.scoremid{position:absolute;left:50%;top:-6px;bottom:-6px;width:2px;background:var(--muted);opacity:.5}
+.scorebar{position:absolute;top:4px;bottom:4px;border-radius:6px;width:0;transition:all 1s cubic-bezier(.2,.8,.2,1)}
+.scoretag{font-weight:900;font-size:13.5px;text-align:right}
+
+/* category overlap grid */
+.grid-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:auto}
+.ovgrid{border-collapse:collapse;width:100%;font-size:13px;min-width:560px}
+.ovgrid th,.ovgrid td{padding:12px 10px;text-align:center;border:1px solid var(--line)}
+.ovgrid th:first-child,.ovgrid td:first-child{text-align:left;font-weight:800;white-space:nowrap;position:sticky;left:0;background:#fbfdfd;z-index:1}
+.ovcell{font-weight:800;font-size:11.5px;border-radius:6px;padding:6px 4px;color:#fff}
+.ov-high{background:var(--coral)}
+.ov-med{background:var(--teal)}
+.ov-low{background:#8fb9c1}
+.ov-none{background:#eef4f5;color:var(--muted)}
+
+/* competitor cards */
+.cgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.ccard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);transition:transform .3s,box-shadow .3s}
+.ccard:hover{transform:translateY(-4px);box-shadow:var(--shadow-lift)}
+.ccard .ch{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.ccard .ch h4{font-size:17px}
+.ccard.peer-card{border-left:4px solid var(--coral)}
+.ttype{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:20px}
+.ttype.listed{background:var(--teal-soft);color:var(--teal)}
+.ttype.private{background:#eef0f1;color:var(--muted)}
+.ccard p.desc{color:var(--muted);font-weight:700;font-size:13.5px;line-height:1.5;margin:0 0 12px}
+.ccard .fin{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px}
+.ccard .fin div{font-size:13px}
+.ccard .fin span{display:block;color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase}
+.ccard .fin b{font-size:16px;font-weight:900}
+.notes label{font-size:11px;font-weight:800;text-transform:uppercase;color:var(--muted);letter-spacing:.04em}
+.notes textarea{width:100%;margin-top:5px;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:inherit;font-weight:700;font-size:13px;resize:vertical;min-height:54px;color:var(--ink)}
+.saved-flag{font-size:11px;font-weight:800;color:var(--teal);opacity:0;transition:opacity .3s}
+.saved-flag.show{opacity:1}
+
+/* signals */
+.feed{display:flex;flex-direction:column;gap:12px}
+.signal{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow);border-left:4px solid var(--line);display:grid;grid-template-columns:96px 1fr;gap:14px}
+.signal.imp-high{border-left-color:var(--coral)}
+.signal.imp-med{border-left-color:var(--teal)}
+.signal.imp-low{border-left-color:var(--cyan)}
+.signal .date{font-weight:900;font-size:13px;color:var(--teal)}
+.signal .comp{font-size:12px;font-weight:800;color:var(--muted);margin-top:3px}
+.signal .txt{font-weight:700;font-size:14px;line-height:1.5}
+.signal .src{font-size:11.5px;color:var(--muted);font-weight:700;margin-top:7px}
+.tagrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:20px;background:var(--bg);color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.tag.h{background:#fde1e4;color:#b32230}.tag.m{background:var(--teal-soft);color:var(--teal)}.tag.l{background:var(--peach);color:#9a5a22}
+.tag.inf{background:#fff3cd;color:#8a6d1f}
+
+/* implications */
+.imp{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow);margin-bottom:14px}
+.imp .pr{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:10px}
+.imp .pr.high{background:#fde1e4;color:#b32230}.imp .pr.med{background:var(--teal-soft);color:var(--teal)}.imp .pr.low{background:var(--peach);color:#9a5a22}
+.imp .ob{font-weight:800;font-size:15px;line-height:1.5}
+.imp .co{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);color:var(--teal);font-weight:800;font-size:14px;line-height:1.5}
+.imp .co::before{content:"Consider ";font-weight:900;color:var(--coral)}
+
+/* roadmap */
+.road{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.mile{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);position:relative;border-top:4px solid var(--teal)}
+.mile:nth-child(4){border-top-color:var(--coral)}
+.mile .yr{font-size:26px;font-weight:900;color:var(--teal)}
+.mile:nth-child(4) .yr{color:var(--coral)}
+.mile .ph{font-weight:900;font-size:15px;margin:4px 0 10px}
+.mile .ds{color:var(--muted);font-weight:700;font-size:13px;line-height:1.5}
+
+/* metric rows */
+.metrics{display:flex;flex-direction:column;gap:14px}
+.metric{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow)}
+.metric .mtop{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.metric .mname{font-weight:900;font-size:15px}
+.metric .msub{color:var(--muted);font-weight:700;font-size:12px}
+.metric .bench{font-size:12.5px;font-weight:800;color:var(--teal);background:var(--teal-soft);padding:3px 10px;border-radius:20px}
+.metric .mbar{margin-top:12px;display:grid;grid-template-columns:1fr 150px;gap:14px;align-items:center}
+.mtrack{height:14px;background:var(--bg);border-radius:8px;overflow:hidden}
+.mfill{height:100%;width:0;background:linear-gradient(90deg,var(--teal),#2d7d8d);border-radius:8px;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.minput{display:flex;align-items:center;gap:8px}
+.minput input{width:90px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;font-family:inherit;font-weight:800;font-size:14px;text-align:right;color:var(--ink)}
+.minput .u{font-weight:800;font-size:12.5px;color:var(--muted)}
+
+/* governance */
+.govlist{display:flex;flex-direction:column;gap:11px}
+.gov{display:flex;align-items:center;justify-content:space-between;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:15px 18px;box-shadow:var(--shadow)}
+.gov .gn{font-weight:800;font-size:14.5px}
+.gtoggle{display:flex;gap:5px}
+.gopt{padding:7px 13px;border-radius:9px;border:1px solid var(--line);font-weight:800;font-size:12px;color:var(--muted);background:#fff;transition:all .2s}
+.gopt.on-todo{background:#eef0f1;color:var(--muted);border-color:#cdd6d8}
+.gopt.on-prog{background:var(--peach);color:#9a5a22;border-color:#f0cda6}
+.gopt.on-done{background:#dff0ec;color:var(--teal);border-color:#aedccf}
+
+.empty{padding:40px;text-align:center;color:var(--muted);font-weight:700}
+.errbox{max-width:560px;margin:60px auto;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--coral);border-radius:var(--r);padding:24px;box-shadow:var(--shadow)}
+.errbox h3{color:var(--coral);margin-bottom:8px}
+.errbox p{color:var(--muted);font-weight:700;line-height:1.5;font-size:14px}
+.errbox code{background:var(--bg);padding:2px 6px;border-radius:5px;font-size:13px}
+
+@media (max-width:900px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .peers,.road{grid-template-columns:1fr}
+  .cgrid{grid-template-columns:1fr}
+  .cards{grid-template-columns:1fr;max-width:380px}
+  .mode-title{font-size:15px}
+  .updated{display:none}
+}
+@media (max-width:560px){
+  .kpis{grid-template-columns:1fr}
+  .barrow{grid-template-columns:96px 1fr 64px}
+  .scorerow{grid-template-columns:96px 1fr 92px}
+  .search input{width:150px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  .fill,.mfill,.scorebar{transition:none!important}
+  .card{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<section id="landing">
+  <svg class="radar" viewBox="0 0 200 200" aria-hidden="true">
+    <circle cx="100" cy="100" r="80"/><circle cx="100" cy="100" r="56"/><circle cx="100" cy="100" r="32"/>
+    <line x1="20" y1="100" x2="180" y2="100" stroke="#1C5E6B" stroke-opacity=".15"/>
+    <line x1="100" y1="20" x2="100" y2="180" stroke="#1C5E6B" stroke-opacity=".15"/>
+    <g class="sweep"><path d="M100 100 L100 20 A80 80 0 0 1 168 60 Z" fill="#1C5E6B" fill-opacity=".12"/><line x1="100" y1="100" x2="100" y2="20" stroke="#1C5E6B" stroke-width="2"/></g>
+    <circle class="blip b1" cx="138" cy="64" r="5"/><circle class="blip b2" cx="70" cy="142" r="5"/><circle class="blip b3" cx="150" cy="128" r="5"/>
+    <circle class="core" cx="100" cy="100" r="6"/>
+  </svg>
+  <div class="welcome-kicker">Mylo Strategy</div>
+  <h1>Welcome to Mylo Competitive Intelligence</h1>
+  <p class="sub">The listed consumer market, the competitors Mylo actually fights, and how close Mylo is to a FY30 IPO. One screen, always current.</p>
+  <div class="cards">
+    <button class="card" data-mode="A">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
+      <h3>Track consumer brands</h3>
+      <p>The listed D2C and platform universe: market caps, growth, and who is in the money.</p>
+      <div class="go">Open mode <svg viewBox="0 0 24 24" width="14" height="14" style="stroke:#EF4D5D;fill:none;stroke-width:2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+    </button>
+    <button class="card" data-mode="B">
+      <div class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M15 20c0-2 .8-3.8 2-5"/></svg></div>
+      <h3>Track your competitors</h3>
+      <p>Mylo against the field, category overlap, live signals, and what to do about them.</p>
+      <div class="go">Open mode <svg viewBox="0 0 24 24" width="14" height="14" style="stroke:#EF4D5D;fill:none;stroke-width:2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+    </button>
+    <button class="card" data-mode="C">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2l2.4 5 5.6.6-4.2 3.7 1.3 5.5L12 19l-5.1 2.8 1.3-5.5L4 12.6l5.6-.6z"/></svg></div>
+      <h3>IPO readiness</h3>
+      <p>The FY30 roadmap and the bar Mylo must clear on financials, growth quality and governance.</p>
+      <div class="go">Open mode <svg viewBox="0 0 24 24" width="14" height="14" style="stroke:#EF4D5D;fill:none;stroke-width:2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+    </button>
+  </div>
+</section>
+
+<!-- APP -->
+<main id="app">
+  <div class="topbar">
+    <button class="home-btn" id="homeBtn"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 9v11h5v-6h4v6h5V9"/></svg>Home</button>
+    <div class="mode-title"><span class="mode-dot"></span><span id="modeTitle"></span></div>
+    <div class="spacer"></div>
+    <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input id="search" type="search" placeholder="Search this tab" autocomplete="off" aria-label="Search the active tab"></div>
+    <div class="updated" id="updated"></div>
+  </div>
+  <nav class="tabs" id="tabs"></nav>
+  <div class="view" id="view"></div>
+</main>
+
+<script id="embedded-data">
+/* Offline snapshot for double-click viewing. When served over http (GitHub Pages, local server),
+   the app fetches the live data/*.json instead and this snapshot is ignored. Updated 2026-06-26. */
+window.__MYLO_DATA__={
+"consumer_universe.json":{"updated":"2026-06-26","next_refresh":"mid-Aug 2026, post Q1 FY27 results","brands":[
+{"name":"FirstCry","tick":"FIRSTCRY","cat":"Baby, kids & maternity","listed":"Aug 2024","cohort":"peer","price":223,"mcap":11825,"rev":8548,"growth":11.6,"pat":-204,"fromHigh":-49,"issue":465,"source":"FY26 results; price/mcap 25 Jun 2026"},
+{"name":"Honasa (Mamaearth)","tick":"HONASA","cat":"Personal & baby care","listed":"Nov 2023","cohort":"peer","price":416,"mcap":13561,"rev":2392,"growth":15.7,"pat":200,"fromHigh":-5,"issue":324,"source":"FY26 results; price/mcap 24-25 Jun 2026"},
+{"name":"Nykaa","tick":"NYKAA","cat":"Beauty & fashion platform","listed":"Nov 2021","cohort":"peer","price":309,"mcap":86788,"rev":10022,"growth":26,"pat":204,"fromHigh":0,"issue":188,"source":"FY26 results; price/mcap 24 Jun 2026. Issue bonus-adjusted"},
+{"name":"Lenskart","tick":"LENSKART","cat":"Eyewear D2C & retail","listed":"Nov 2025","cohort":"d2c","price":509,"mcap":88483,"rev":8988,"growth":28,"pat":501,"fromHigh":null,"issue":402,"source":"FY26 results; price/mcap 25 Jun 2026"},
+{"name":"Wakefit","tick":"WAKEFIT","cat":"Home & mattress D2C","listed":"Dec 2025","cohort":"d2c","price":120,"mcap":4043,"rev":1489,"growth":16.9,"pat":189,"fromHigh":-47,"issue":195,"source":"FY26 results; price/mcap 24-25 Jun 2026"},
+{"name":"BlueStone","tick":"BLUESTONE","cat":"Jewellery D2C & retail","listed":"Aug 2025","cohort":"d2c","price":533,"mcap":8116,"rev":2441,"growth":38,"pat":26,"fromHigh":-33,"issue":517,"source":"FY26 results; price 26 Jun / mcap 25 Jun 2026"},
+{"name":"Urban Company","tick":"URBANCO","cat":"Home services platform","listed":"Sep 2025","cohort":"platform","price":133,"mcap":21125,"rev":1556,"growth":36,"pat":-235,"fromHigh":-34,"issue":103,"source":"FY26 results; price 23 Jun / mcap Mar 2026"},
+{"name":"Meesho","tick":"MEESHO","cat":"Value e-commerce platform","listed":"Dec 2025","cohort":"platform","price":188,"mcap":86334,"rev":12626,"growth":34.5,"pat":-1358,"fromHigh":-26,"issue":111,"source":"FY26 results; price/mcap 27 May 2026. Loss incl one-time reorg costs"}
+]},
+"competitor_tracker.json":{"updated":"2026-06-26","categories":["Diapers","Feeding & lactation","Baby & skin care","Health & nutrition"],"direct_peers":["FirstCry","Honasa (Mamaearth)","Nykaa"],
+"mylo":{"latest_period":null,"revenue_cr":null,"growth_pct":null,"gm_pct":null,"cm3_pct":null,"ebitda_pct":null,"mau_lakh":null,"m1_repeat_pct":null,"aov_inr":null,"source":"awaiting MIS"},
+"competitors":[
+{"name":"FirstCry (Brainbees)","type":"listed","direct_peer":true,"desc":"India's largest baby, kids and maternity platform. Omni-channel: app, web and 1,000+ stores. Owns BabyHug private label across diapers, apparel and gear. The most direct, scaled competitor to Mylo's category footprint.","rev":8548,"growth":11.6,"pat":-204,"latest_period":"FY26","cats":{"Diapers":"high","Feeding & lactation":"high","Baby & skin care":"high","Health & nutrition":"med"},"source":"FY26 results (revenue +11.6% to INR 8,548 cr; net loss narrowed to INR 204 cr; OCF positive INR 365 cr)"},
+{"name":"Honasa (Mamaearth)","type":"listed","direct_peer":true,"desc":"Listed house of brands led by Mamaearth, plus The Derma Co, Aqualogica, BBlunt and BabyChakra. Baby and toddler skin care is a core franchise; BabyChakra adds a parenting-content and commerce funnel that overlaps Mylo's community-led model.","rev":2392,"growth":15.7,"pat":200,"latest_period":"FY26","cats":{"Diapers":"low","Feeding & lactation":"low","Baby & skin care":"high","Health & nutrition":"med"},"source":"FY26 results (revenue INR 2,392 cr; PAT INR 200 cr, up 2.7x; EBITDA INR 231 cr)"},
+{"name":"Nykaa","type":"listed","direct_peer":true,"desc":"Listed beauty and fashion platform. Not a baby-care pure-play, but a direct peer on the listed-D2C journey and an increasingly important distribution and discovery channel for mother-and-baby brands, including Mylo's own listings.","rev":10022,"growth":26,"pat":204,"latest_period":"FY26","cats":{"Diapers":"none","Feeding & lactation":"low","Baby & skin care":"med","Health & nutrition":"low"},"source":"FY26 results (revenue INR 10,022 cr, +26%; PAT INR 204 cr)"},
+{"name":"The Moms Co (Good Glamm)","type":"private","direct_peer":false,"desc":"Toxin-free mother-and-baby personal care brand under the Good Glamm Group. Strong on baby lotions, oils and natural skin care; distribution disrupted by the parent group's well-publicised funding and restructuring stress.","rev":null,"growth":null,"pat":null,"latest_period":"not disclosed","cats":{"Diapers":"none","Feeding & lactation":"low","Baby & skin care":"high","Health & nutrition":"low"},"source":"positioning only; financials not separately disclosed"},
+{"name":"Mother Sparsh","type":"private","direct_peer":false,"desc":"ITC-backed baby and personal care brand, best known for plant-based water wipes and ayurvedic baby care. ITC's distribution muscle makes this a watch item in wipes and baby skin care.","rev":null,"growth":null,"pat":null,"latest_period":"not disclosed","cats":{"Diapers":"low","Feeding & lactation":"low","Baby & skin care":"high","Health & nutrition":"low"},"source":"positioning only; backed by ITC"},
+{"name":"SuperBottoms","type":"private","direct_peer":false,"desc":"D2C leader in reusable cloth diapers, langots and padded underwear. Owns the sustainable-diapering niche with a loyal repeat base; a focused threat in the diaper category specifically.","rev":null,"growth":null,"pat":null,"latest_period":"not disclosed","cats":{"Diapers":"high","Feeding & lactation":"none","Baby & skin care":"low","Health & nutrition":"none"},"source":"positioning only"},
+{"name":"R for Rabbit","type":"private","direct_peer":false,"desc":"Baby gear and products brand spanning car seats, strollers, feeding and safety. Hardware-led range that overlaps Mylo on feeding and accessories more than on consumables.","rev":null,"growth":null,"pat":null,"latest_period":"not disclosed","cats":{"Diapers":"low","Feeding & lactation":"med","Baby & skin care":"low","Health & nutrition":"none"},"source":"positioning only"},
+{"name":"LuvLap","type":"private","direct_peer":false,"desc":"Mass-market baby products brand strong in feeding bottles, breast pumps, sterilisers and gear, with deep general-trade and marketplace reach. The closest private competitor on feeding and lactation hardware.","rev":null,"growth":null,"pat":null,"latest_period":"not disclosed","cats":{"Diapers":"med","Feeding & lactation":"high","Baby & skin care":"med","Health & nutrition":"low"},"source":"positioning only"},
+{"name":"MamyPoko (Unicharm)","type":"private","direct_peer":false,"desc":"Unicharm's diaper brand, a category-leading player in taped and pant-style diapers. Indian baby line not separately disclosed (foreign-listed parent). Held as a diaper-category backdrop, not a clean comparable.","rev":null,"growth":null,"pat":null,"latest_period":"not disclosed","cats":{"Diapers":"high","Feeding & lactation":"none","Baby & skin care":"none","Health & nutrition":"none"},"source":"category backdrop; India financials not disclosed"},
+{"name":"Pampers (P&G via PGHH)","type":"listed","direct_peer":false,"desc":"P&G's flagship diaper brand, distributed in India through P&G Hygiene and Health Care. Baby line not separately disclosed. Held as a diaper-category backdrop given P&G's scale and shelf presence.","rev":null,"growth":null,"pat":null,"latest_period":"not disclosed","cats":{"Diapers":"high","Feeding & lactation":"none","Baby & skin care":"none","Health & nutrition":"none"},"source":"category backdrop; baby line not separately disclosed"},
+{"name":"Nestle India","type":"listed","direct_peer":false,"desc":"Listed FMCG major; Cerelac and infant-nutrition portfolio anchor the health and nutrition category. Held as a nutrition-category backdrop rather than a head-to-head competitor across Mylo's range.","rev":null,"growth":null,"pat":null,"latest_period":"not disclosed","cats":{"Diapers":"none","Feeding & lactation":"low","Baby & skin care":"none","Health & nutrition":"high"},"source":"category backdrop; infant-nutrition line within larger FMCG portfolio"}
+],
+"signals":[
+{"date":"2026-05-22","comp":"FirstCry (Brainbees)","category":"all","impact":"high","txt":"FY26 results: revenue up 11.6% to INR 8,548 cr, net loss narrowed to INR 204 cr, operating cash flow turned positive at INR 365 cr, GMV INR 11,643 cr. The scaled peer is grinding toward profitability.","source":"company FY26 results","confirmed":true},
+{"date":"2026-05-20","comp":"Honasa (Mamaearth)","category":"baby & skin care","impact":"high","txt":"FY26 results: revenue INR 2,392 cr, PAT up 2.7x to INR 200 cr, EBITDA tripled to INR 231 cr. Profitable growth strengthens Honasa's listed-peer benchmark.","source":"company FY26 results","confirmed":true},
+{"date":"2026-05-22","comp":"Honasa (Mamaearth)","category":"health & nutrition","impact":"high","txt":"Acquired 58% of Fluence Pharma for INR 135 cr, extending into baby and child health and nutrition adjacencies.","source":"company release (provided in brief)","confirmed":false},
+{"date":"2026-05-08","comp":"Nykaa","category":"baby & skin care","impact":"med","txt":"FY26 revenue crossed INR 10,022 cr (+26%) with PAT INR 204 cr; offline footprint now 313 stores. A stronger distribution and discovery channel for mother-and-baby brands.","source":"company FY26 results","confirmed":true}
+],
+"implications":[
+{"priority":"high","observation":"FirstCry, the most direct peer, is now operating-cash-flow positive at scale while still posting a small net loss. The bar for a credible mother-and-baby listing is shifting from growth-at-all-costs to profitable growth.","consider":"Anchor Mylo's FY27 to FY30 narrative on contribution margin and cash generation, not just topline. Lead investor conversations with CM3 and EBITDA trajectory benchmarked against FirstCry's path."},
+{"priority":"high","observation":"Honasa is compounding profit (PAT up 2.7x) and acquiring into health and nutrition adjacencies, overlapping Mylo on baby skin care and the parenting-community funnel via BabyChakra.","consider":"Defend the community-to-commerce moat and quantify repeat behaviour (M1 repeat, LTV to CAC). Treat health and nutrition as a contested adjacency rather than open space."},
+{"priority":"med","observation":"Private specialists are carving defensible niches: SuperBottoms in reusable diapers, LuvLap in feeding hardware, Mother Sparsh in wipes with ITC backing.","consider":"Map Mylo's category share against each niche leader and decide where to lead (own) versus participate (range-fill). Avoid spreading thin across categories where a focused private brand already owns the repeat customer."},
+{"priority":"low","observation":"MamyPoko, Pampers and Nestle dominate their respective categories but do not disclose India baby-line economics, so they are backdrops rather than comparables.","consider":"Use them to frame total category size and pricing ceilings in the IPO story, not as financial benchmarks."}
+],
+"history":[]},
+"ipo_readiness.json":{"updated":"2026-06-26","target_window":"FY30","roadmap":[
+{"year":"FY27","phase":"Foundation","desc":"Reach contribution (CM3) and EBITDA positive. Lock the monthly close and MIS cadence. Clean up the cap table and ESOP pool early."},
+{"year":"FY28","phase":"Scale & economics","desc":"Compound revenue at 25%+ with rising gross and EBITDA margins. Prove M1 repeat and LTV to CAC at scale. Diversify channels beyond performance marketing."},
+{"year":"FY29","phase":"Governance","desc":"Seat a majority-independent board, complete related-party cleanup, and build a three-year Big-4 audited track record. Stand up a DRHP-grade data room."},
+{"year":"FY30","phase":"Listing","desc":"List with PAT positive and a clean governance and disclosure record, in line with how Lenskart, Honasa, Wakefit and BlueStone came to market."}
+],
+"financial":[
+{"key":"rev","name":"Revenue run-rate","unit":"INR cr","sub":"annual","bar":1500,"barLbl":"1,000 to 2,400 cr","mylo_value":null,"lowerBetter":false},
+{"key":"growth","name":"Revenue growth","unit":"%","sub":"YoY, sustained","bar":25,"barLbl":"25%+ sustained","mylo_value":null,"lowerBetter":false},
+{"key":"gm","name":"Gross margin","unit":"%","sub":"","bar":60,"barLbl":"55 to 70%","mylo_value":null,"lowerBetter":false},
+{"key":"ebitda","name":"EBITDA margin","unit":"%","sub":"and rising","bar":10,"barLbl":"10%+ and rising","mylo_value":null,"lowerBetter":false},
+{"key":"pat","name":"PAT margin","unit":"%","sub":"the hard bar","bar":1,"barLbl":"positive at listing","mylo_value":null,"lowerBetter":false},
+{"key":"ocf","name":"Operating cash flow","unit":"INR cr","sub":"annual","bar":1,"barLbl":"positive","mylo_value":null,"lowerBetter":false}
+],
+"growth":[
+{"key":"mau","name":"Monthly active users","unit":"lakh","sub":"","bar":50,"barLbl":"scaled and growing","mylo_value":null,"lowerBetter":false},
+{"key":"repeat","name":"M1 repeat rate","unit":"%","sub":"","bar":40,"barLbl":"40%+","mylo_value":null,"lowerBetter":false},
+{"key":"aov","name":"Average order value","unit":"INR","sub":"","bar":700,"barLbl":"stable or rising","mylo_value":null,"lowerBetter":false},
+{"key":"ltvcac","name":"LTV to CAC","unit":"x","sub":"","bar":3,"barLbl":"3x+","mylo_value":null,"lowerBetter":false},
+{"key":"mktg","name":"Marketing as share of revenue","unit":"%","sub":"falling","bar":30,"barLbl":"under 30% and falling","mylo_value":null,"lowerBetter":true},
+{"key":"channel","name":"Channel diversification","unit":"%","sub":"non-performance share","bar":40,"barLbl":"balanced mix","mylo_value":null,"lowerBetter":false}
+],
+"governance":[
+{"name":"Big-4 audited, 3-year clean track record","state":"todo"},
+{"name":"Majority-independent board","state":"todo"},
+{"name":"Clean cap table and rationalised ESOP pool","state":"todo"},
+{"name":"Related-party transactions cleaned up","state":"todo"},
+{"name":"Monthly close and MIS maturity","state":"todo"},
+{"name":"DRHP-grade data room","state":"todo"}
+]}
+};
+</script>
+<script>
+"use strict";
+
+/* ---------- safe storage ---------- */
+const store = (function(){
+  let ok=true; try{const k="__mylo";localStorage.setItem(k,"1");localStorage.removeItem(k);}catch(e){ok=false;}
+  const mem={};
+  return {
+    get(k){ if(ok){try{return localStorage.getItem(k);}catch(e){}} return (k in mem)?mem[k]:null; },
+    set(k,v){ if(ok){try{localStorage.setItem(k,v);return;}catch(e){}} mem[k]=v; }
+  };
+})();
+const jget=(k,d)=>{const v=store.get(k);if(!v)return d;try{return JSON.parse(v);}catch(e){return d;}};
+const jset=(k,o)=>store.set(k,JSON.stringify(o));
+
+/* ---------- number formatting (Indian) ---------- */
+function inr(n){ if(n==null||isNaN(n))return "n/a"; const neg=n<0;n=Math.abs(Math.round(n));
+  let s=n.toString(); if(s.length>3){let last=s.slice(-3),rest=s.slice(0,-3);rest=rest.replace(/\B(?=(\d{2})+(?!\d))/g,",");s=rest+","+last;}
+  return (neg?"-":"")+s; }
+function cr(n){ if(n==null||isNaN(n))return "n/a"; if(Math.abs(n)>=100000)return "₹"+inr(Math.round(n/100000*10)/10).replace(/\.0$/,"")+" lakh cr"; return "₹"+inr(n)+" cr"; }
+function pct(n,d){ if(n==null||isNaN(n))return "n/a"; return (n>0?"+":"")+(d?n.toFixed(1):Math.round(n))+"%"; }
+
+/* ---------- state ---------- */
+let DATA={consumer:null,competitor:null,ipo:null};
+let cur={mode:null,tab:0};
+let leagueSort={key:"mcap",dir:-1}, leagueCohort="all";
+let sigFilter={comp:"all",cat:"all",imp:"all"};
+
+const MODES={
+  A:{title:"Track consumer brands",src:()=>DATA.consumer.updated,tabs:["Overview","League table","Charts","Listing scorecard"]},
+  B:{title:"Track your competitors",src:()=>DATA.competitor.updated,tabs:["Mylo vs field","Category overlap","Competitor cards","Signals feed","Implications"]},
+  C:{title:"IPO readiness",src:()=>DATA.ipo.updated,tabs:["Roadmap","Financial readiness","Growth quality","Governance"]}
+};
+
+/* ---------- boot ---------- */
+async function loadJSON(file){
+  // Live data first: works whether data/ is a sibling of index.html (Pages root) or one level up (served from website/)
+  const bases=["data/","../data/","./data/"];
+  for(const base of bases){
+    try{const r=await fetch(base+file);if(r.ok)return await r.json();}catch(e){}
+  }
+  // Offline / double-click fallback: embedded snapshot, only reached when no server is serving the JSON
+  if(window.__MYLO_DATA__&&window.__MYLO_DATA__[file])return window.__MYLO_DATA__[file];
+  throw new Error("not found: "+file);
+}
+async function boot(){
+  try{
+    const [a,b,c]=await Promise.all([
+      loadJSON("consumer_universe.json"),
+      loadJSON("competitor_tracker.json"),
+      loadJSON("ipo_readiness.json")
+    ]);
+    DATA.consumer=a;DATA.competitor=b;DATA.ipo=c;
+  }catch(e){
+    document.getElementById("view").innerHTML=
+      '<div class="errbox"><h3>Data could not load</h3><p>The three JSON files in <code>data/</code> were not reachable. '+
+      'This is normal if you opened the file directly from disk. Serve the folder over http (for example <code>python -m http.server</code> inside <code>website/</code>, or push to GitHub Pages) and reload.</p></div>';
+    document.getElementById("app").classList.add("show");
+    document.getElementById("landing").classList.add("hide");
+    return;
+  }
+}
+
+/* ---------- navigation ---------- */
+function openMode(m){
+  cur.mode=m;cur.tab=0;
+  document.getElementById("landing").classList.add("hide");
+  document.getElementById("app").classList.add("show");
+  document.getElementById("modeTitle").textContent=MODES[m].title;
+  document.getElementById("updated").textContent="Updated "+fmtDate(MODES[m].src());
+  document.getElementById("search").value="";
+  buildTabs();render();
+  window.scrollTo(0,0);
+}
+function goHome(){
+  document.getElementById("app").classList.remove("show");
+  document.getElementById("landing").classList.remove("hide");
+  cur.mode=null;
+}
+function buildTabs(){
+  const t=document.getElementById("tabs");t.innerHTML="";
+  MODES[cur.mode].tabs.forEach((name,i)=>{
+    const b=document.createElement("button");
+    b.className="tab"+(i===cur.tab?" active":"");b.textContent=name;
+    b.onclick=()=>{cur.tab=i;document.getElementById("search").value="";[...t.children].forEach((c,j)=>c.classList.toggle("active",j===i));render();};
+    t.appendChild(b);
+  });
+}
+function fmtDate(s){ if(!s)return ""; const d=new Date(s); if(isNaN(d))return s;
+  return d.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}); }
+
+/* ---------- render dispatch ---------- */
+function render(){
+  const v=document.getElementById("view");v.innerHTML="";
+  const m=cur.mode,t=cur.tab;
+  if(m==="A"){[A_overview,A_league,A_charts,A_score][t](v);}
+  else if(m==="B"){[B_field,B_overlap,B_cards,B_signals,B_implications][t](v);}
+  else if(m==="C"){[C_roadmap,C_financial,C_growth,C_governance][t](v);}
+  requestAnimationFrame(()=>{ // grow bars after paint
+    document.querySelectorAll("[data-w]").forEach(el=>{el.style.width=el.getAttribute("data-w");});
+    document.querySelectorAll("[data-left]").forEach(el=>{el.style.left=el.getAttribute("data-left");el.style.width=el.getAttribute("data-bw");});
+  });
+  applySearch();
+}
+function head(title,sub){return '<div class="pane-head"><h2>'+title+'</h2>'+(sub?'<p>'+sub+'</p>':'')+'</div>';}
+function countUp(el){
+  const target=parseFloat(el.getAttribute("data-cu")),suf=el.getAttribute("data-suf")||"",pre=el.getAttribute("data-pre")||"";
+  if(matchMedia("(prefers-reduced-motion:reduce)").matches){el.textContent=pre+fmtCU(target)+suf;return;}
+  let start=null,dur=900;
+  function step(ts){if(!start)start=ts;const p=Math.min((ts-start)/dur,1);const e=1-Math.pow(1-p,3);
+    el.textContent=pre+fmtCU(target*e)+suf;if(p<1)requestAnimationFrame(step);}
+  requestAnimationFrame(step);
+}
+function fmtCU(n){return inr(Math.round(n));}
+
+/* ================= MODE A ================= */
+function A_overview(v){
+  const b=DATA.consumer.brands, peers=b.filter(x=>x.cohort==="peer");
+  const profitable=b.filter(x=>x.pat>0).length;
+  const totMcap=b.reduce((s,x)=>s+(x.mcap||0),0);
+  const peerRev=peers.reduce((s,x)=>s+(x.rev||0),0);
+  v.innerHTML=head("Overview","The eight listed names Mylo benchmarks against, grouped into direct peers, D2C brands and platforms.");
+  const kp=document.createElement("div");kp.className="kpis";
+  kp.innerHTML=
+    kpi("Brands tracked",b.length,"",""," across 3 cohorts")+
+    kpi("Profitable in FY26",profitable,"","","of "+b.length+" listed")+
+    kpi("Combined market cap",totMcap,"","₹","across 8 listed names","cr")+
+    kpi("Direct-peer revenue",peerRev,"","₹","FirstCry, Honasa, Nykaa","cr");
+  v.appendChild(kp);
+  const st=document.createElement("div");st.className="section-title";st.textContent="The three direct peers";v.appendChild(st);
+  const pc=document.createElement("div");pc.className="peers";
+  peers.forEach(p=>{pc.innerHTML+=
+    '<div class="peer" data-s="'+sx(p.name+" "+p.cat)+'"><div class="nm">'+p.name+'</div>'+
+    '<div class="meta">'+p.cat+' · listed '+p.listed+'</div>'+
+    '<div class="row"><span>Market cap</span><b>'+cr(p.mcap)+'</b></div>'+
+    '<div class="row"><span>FY26 revenue</span><b>'+cr(p.rev)+'</b></div>'+
+    '<div class="row"><span>Growth</span><b class="'+(p.growth>=0?"pos":"neg")+'">'+pct(p.growth,1)+'</b></div>'+
+    '<div class="row"><span>FY26 PAT</span><b class="'+(p.pat>=0?"pos":"neg")+'">'+(p.pat>=0?"₹"+inr(p.pat)+" cr":"-₹"+inr(Math.abs(p.pat))+" cr")+'</b></div></div>';});
+  v.appendChild(pc);
+  v.querySelectorAll("[data-cu]").forEach(countUp);
+}
+function kpi(lbl,val,sub,pre,subtxt,suf){
+  return '<div class="kpi" data-s="'+sx(lbl+" "+subtxt)+'"><div class="lbl">'+lbl+'</div>'+
+    '<div class="val" data-cu="'+val+'" data-pre="'+(pre||"")+'" data-suf="'+(suf?suf==="L"?"":" "+suf:"")+'">0</div>'+
+    '<div class="sub">'+subtxt+'</div></div>';
+}
+function A_league(v){
+  v.innerHTML=head("League table","Sort any column. Filter by cohort. Search filters live.");
+  const f=document.createElement("div");f.className="filters";
+  [["all","All"],["peer","Direct peers"],["d2c","D2C brands"],["platform","Platforms"]].forEach(([k,l])=>{
+    const btn=document.createElement("button");btn.className="fbtn"+(leagueCohort===k?" on":"");btn.textContent=l;
+    btn.onclick=()=>{leagueCohort=k;A_league(v);applySearch();};f.appendChild(btn);});
+  v.appendChild(f);
+  const cols=[["name","Company",0],["cat","Category",0],["listed","Listed",0],["price","Price ₹",1],
+    ["mcap","Mkt cap",1],["rev","FY26 rev",1],["growth","Growth",1],["pat","PAT",1],["profit","Result",0],["fromHigh","vs 52w high",1]];
+  let rows=DATA.consumer.brands.filter(x=>leagueCohort==="all"||x.cohort===leagueCohort);
+  rows.sort((a,b)=>{let k=leagueSort.key;
+    if(k==="profit"){return ((a.pat>0?1:0)-(b.pat>0?1:0))*leagueSort.dir;}
+    let av=a[k],bv=b[k]; if(typeof av==="string")return av.localeCompare(bv)*leagueSort.dir;
+    av=av==null?-1e15:av;bv=bv==null?-1e15:bv;return (av-bv)*leagueSort.dir;});
+  let html='<div class="tbl-wrap"><table><thead><tr>';
+  cols.forEach(c=>{const sorted=leagueSort.key===c[0];
+    html+='<th class="'+(c[2]?"num ":"")+(sorted?"sorted":"")+'" data-k="'+c[0]+'">'+c[1]+'<span class="arr">'+(sorted?(leagueSort.dir<0?"▼":"▲"):"▼")+'</span></th>';});
+  html+='</tr></thead><tbody>';
+  rows.forEach(r=>{
+    html+='<tr data-s="'+sx(r.name+" "+r.cat+" "+r.cohort)+'">'+
+      '<td class="cell-co">'+r.name+'<div class="tick">'+r.tick+'  <span class="pill '+r.cohort+'">'+r.cohort+'</span></div></td>'+
+      '<td>'+r.cat+'</td><td>'+r.listed+'</td>'+
+      '<td class="num">'+inr(r.price)+'</td>'+
+      '<td class="num">'+cr(r.mcap)+'</td>'+
+      '<td class="num">'+cr(r.rev)+'</td>'+
+      '<td class="num '+(r.growth>=0?"pos":"neg")+'">'+pct(r.growth,1)+'</td>'+
+      '<td class="num '+(r.pat>=0?"pos":"neg")+'">'+(r.pat>=0?inr(r.pat):"-"+inr(Math.abs(r.pat)))+'</td>'+
+      '<td><span class="chip '+(r.pat>0?"profit":"loss")+'">'+(r.pat>0?"Profit":"Loss")+'</span></td>'+
+      '<td class="num '+(r.fromHigh==null?"":"neg")+'">'+(r.fromHigh==null?"n/a":pct(r.fromHigh,0))+'</td></tr>';
+  });
+  html+='</tbody></table></div>';
+  const w=document.createElement("div");w.innerHTML=html;v.appendChild(w);
+  v.querySelectorAll("th").forEach(th=>{th.onclick=()=>{const k=th.getAttribute("data-k");
+    if(leagueSort.key===k)leagueSort.dir*=-1;else{leagueSort.key=k;leagueSort.dir=(k==="name"||k==="cat"||k==="listed")?1:-1;}
+    A_league(v);applySearch();};});
+}
+function A_charts(v){
+  v.innerHTML=head("Charts","Market cap ranking, and revenue growth coloured by profitability.");
+  const b=DATA.consumer.brands;
+  // market cap
+  let mc=[...b].sort((x,y)=>y.mcap-x.mcap);const maxM=mc[0].mcap;
+  let h1='<div class="section-title">Market cap ranking</div><div class="bars">';
+  mc.forEach(x=>{h1+='<div class="barrow" data-s="'+sx(x.name)+'"><div class="nm">'+x.name+'</div>'+
+    '<div class="track"><div class="fill cyan" data-w="'+(x.mcap/maxM*100).toFixed(1)+'%"></div></div>'+
+    '<div class="barval">'+cr(x.mcap)+'</div></div>';});
+  h1+='</div>';
+  // growth coloured by profit
+  let gr=[...b].sort((x,y)=>y.growth-x.growth);const maxG=Math.max(...gr.map(x=>x.growth));
+  let h2='<div class="section-title">Revenue growth, coloured by FY26 result</div><div class="bars">';
+  gr.forEach(x=>{h2+='<div class="barrow" data-s="'+sx(x.name)+'"><div class="nm">'+x.name+'</div>'+
+    '<div class="track"><div class="fill '+(x.pat>0?"teal":"coral")+'" data-w="'+(x.growth/maxG*100).toFixed(1)+'%"></div></div>'+
+    '<div class="barval">'+pct(x.growth,1)+'</div></div>';});
+  h2+='<div class="legend"><span><i style="background:#1C5E6B"></i>Profitable in FY26</span><span><i style="background:#EF4D5D"></i>Loss-making in FY26</span></div></div>';
+  v.innerHTML+=h1+h2;
+}
+function A_score(v){
+  v.innerHTML=head("Listing scorecard","Current price versus issue price. The centre line is the issue price. Teal is above, coral is below.");
+  const b=DATA.consumer.brands.filter(x=>x.issue!=null);
+  let html='<div class="score">';
+  b.forEach(x=>{const diff=(x.price-x.issue)/x.issue*100;const cl=Math.max(-100,Math.min(100,diff));
+    const above=diff>=0;const halfw=Math.abs(cl)/2;const left=above?50:50-halfw;
+    html+='<div class="scorerow" data-s="'+sx(x.name)+'"><div class="nm">'+x.name+'</div>'+
+      '<div class="scoretrack"><div class="scoremid"></div>'+
+      '<div class="scorebar" style="background:'+(above?"linear-gradient(90deg,#1C5E6B,#2d7d8d)":"linear-gradient(90deg,#f4727f,#EF4D5D)")+'" data-left="'+left+'%" data-bw="'+halfw+'%"></div></div>'+
+      '<div class="scoretag '+(above?"pos":"neg")+'">'+pct(diff,0)+'<div class="tick" style="text-align:right">issue ₹'+inr(x.issue)+'</div></div></div>';});
+  html+='</div>';
+  v.innerHTML+=html;
+}
+
+/* ================= MODE B ================= */
+function B_field(v){
+  const m=DATA.competitor.mylo;
+  const peers=DATA.competitor.competitors.filter(c=>c.direct_peer);
+  v.innerHTML=head("Mylo vs field","Mylo against each listed direct peer on shared metrics. The Mylo row comes only from the quarterly MIS and is never overwritten by the competitor refresh.");
+  const rows=[
+    ["Latest period",x=>x.latest_period||"n/a", m.latest_period||"awaiting MIS"],
+    ["Revenue",x=>cr(x.rev), m.revenue_cr!=null?cr(m.revenue_cr):"awaiting MIS"],
+    ["Revenue growth",x=>x.growth!=null?pct(x.growth,1):"n/a", m.growth_pct!=null?pct(m.growth_pct,1):"awaiting MIS"],
+    ["Gross margin",x=>"not disclosed", m.gm_pct!=null?m.gm_pct+"%":"awaiting MIS"],
+    ["EBITDA margin",x=>"not disclosed", m.ebitda_pct!=null?m.ebitda_pct+"%":"awaiting MIS"]
+  ];
+  let html='<div class="tbl-wrap"><table><thead><tr><th>Metric</th><th style="color:#EF4D5D">Mylo</th>';
+  peers.forEach(p=>html+='<th>'+p.name+'</th>');
+  html+='</tr></thead><tbody>';
+  rows.forEach(r=>{html+='<tr data-s="'+sx(r[0])+'"><td class="cell-co">'+r[0]+'</td>'+
+    '<td style="font-weight:900;color:'+(String(r[2]).indexOf("awaiting")>-1?"#5d7780":"#EF4D5D")+'">'+r[2]+'</td>';
+    peers.forEach(p=>html+='<td>'+r[1](p)+'</td>');html+='</tr>';});
+  html+='</tbody></table></div>';
+  if(m.revenue_cr==null) html+='<p class="pane-head" style="color:#9a5a22;font-weight:800;margin-top:14px">Mylo figures populate after the first quarterly MIS is dropped into <code>mylo_mis/</code> and Skill 3 is run.</p>';
+  v.innerHTML+=html;
+}
+function B_overlap(v){
+  v.innerHTML=head("Category overlap","How strongly each competitor overlaps Mylo's four core categories. Coral is a high overlap, the most contested ground.");
+  const cats=DATA.competitor.categories;
+  const comps=DATA.competitor.competitors;
+  let html='<div class="grid-wrap"><table class="ovgrid"><thead><tr><th>Competitor</th>';
+  cats.forEach(c=>html+='<th>'+c+'</th>');html+='</tr></thead><tbody>';
+  comps.forEach(c=>{html+='<tr data-s="'+sx(c.name)+'"><td>'+c.name+'</td>';
+    cats.forEach(cat=>{const lvl=(c.cats&&c.cats[cat])||"none";const cls={high:"ov-high",med:"ov-med",low:"ov-low",none:"ov-none"}[lvl];
+      html+='<td><span class="ovcell '+cls+'">'+lvl+'</span></td>';});
+    html+='</tr>';});
+  html+='</tbody></table></div>';
+  html+='<div class="legend" style="margin-top:14px"><span><i style="background:#EF4D5D"></i>High</span><span><i style="background:#1C5E6B"></i>Medium</span><span><i style="background:#8fb9c1"></i>Low</span><span><i style="background:#eef4f5"></i>None</span></div>';
+  v.innerHTML+=html;
+}
+function B_cards(v){
+  v.innerHTML=head("Competitor cards","One card per competitor. Notes save to this browser.");
+  const notes=jget("mylo_ci_notes",{});
+  const wrap=document.createElement("div");wrap.className="cgrid";
+  DATA.competitor.competitors.forEach((c,i)=>{
+    const card=document.createElement("div");card.className="ccard"+(c.direct_peer?" peer-card":"");
+    card.setAttribute("data-s",sx(c.name+" "+c.desc+" "+c.type));
+    let fin="";
+    if(c.rev!=null)fin+='<div><span>Revenue</span><b>'+cr(c.rev)+'</b></div>';
+    if(c.growth!=null)fin+='<div><span>Growth</span><b class="'+(c.growth>=0?"pos":"neg")+'">'+pct(c.growth,1)+'</b></div>';
+    if(c.pat!=null)fin+='<div><span>PAT</span><b class="'+(c.pat>=0?"pos":"neg")+'">'+(c.pat>=0?"₹"+inr(c.pat)+" cr":"-₹"+inr(Math.abs(c.pat))+" cr")+'</b></div>';
+    if(c.latest_period)fin+='<div><span>Period</span><b style="font-size:13px">'+c.latest_period+'</b></div>';
+    card.innerHTML=
+      '<div class="ch"><h4>'+c.name+'</h4><span class="ttype '+c.type+'">'+c.type+(c.direct_peer?' · peer':'')+'</span></div>'+
+      '<p class="desc">'+c.desc+'</p>'+
+      (fin?'<div class="fin">'+fin+'</div>':'<div class="fin"><div><span>Financials</span><b style="font-size:13px;color:#5d7780">positioning only</b></div></div>')+
+      '<div class="notes"><label>My notes <span class="saved-flag" id="sf'+i+'">saved</span></label>'+
+      '<textarea data-i="'+i+'" placeholder="Add a private note on '+c.name.replace(/"/g,"")+'">'+(notes[c.name]||"")+'</textarea></div>';
+    wrap.appendChild(card);
+  });
+  v.appendChild(wrap);
+  v.querySelectorAll("textarea[data-i]").forEach(ta=>{
+    let t;ta.addEventListener("input",()=>{const i=ta.getAttribute("data-i");const name=DATA.competitor.competitors[i].name;
+      const n=jget("mylo_ci_notes",{});n[name]=ta.value;jset("mylo_ci_notes",n);
+      const f=document.getElementById("sf"+i);f.classList.add("show");clearTimeout(t);t=setTimeout(()=>f.classList.remove("show"),1200);});
+  });
+}
+function B_signals(v){
+  v.innerHTML=head("Signals feed","Dated competitor moves, newest first. Inference is flagged separately from confirmed facts.");
+  const sig=[...DATA.competitor.signals].sort((a,b)=>b.date.localeCompare(a.date));
+  const comps=["all",...new Set(sig.map(s=>s.comp))];
+  const cats=["all",...new Set(sig.map(s=>s.category))];
+  const f=document.createElement("div");f.className="filters";
+  f.appendChild(selFilter("Competitor",comps,sigFilter.comp,val=>{sigFilter.comp=val;B_signals(v);applySearch();}));
+  f.appendChild(selFilter("Category",cats,sigFilter.cat,val=>{sigFilter.cat=val;B_signals(v);applySearch();}));
+  f.appendChild(selFilter("Impact",["all","high","med","low"],sigFilter.imp,val=>{sigFilter.imp=val;B_signals(v);applySearch();}));
+  v.appendChild(f);
+  const feed=document.createElement("div");feed.className="feed";
+  const shown=sig.filter(s=>(sigFilter.comp==="all"||s.comp===sigFilter.comp)&&(sigFilter.cat==="all"||s.category===sigFilter.cat)&&(sigFilter.imp==="all"||s.impact===sigFilter.imp));
+  if(!shown.length)feed.innerHTML='<div class="empty">No signals match these filters.</div>';
+  shown.forEach(s=>{const ic={high:"h",med:"m",low:"l"}[s.impact];
+    feed.innerHTML+='<div class="signal imp-'+s.impact+'" data-s="'+sx(s.comp+" "+s.txt+" "+s.category)+'">'+
+      '<div><div class="date">'+fmtDate(s.date)+'</div><div class="comp">'+s.comp+'</div></div>'+
+      '<div><div class="txt">'+s.txt+'</div>'+
+      '<div class="tagrow"><span class="tag '+ic+'">'+s.impact+' impact</span><span class="tag">'+s.category+'</span>'+
+      (s.confirmed===false?'<span class="tag inf">inference</span>':'<span class="tag">confirmed</span>')+'</div>'+
+      '<div class="src">Source: '+s.source+'</div></div></div>';});
+  v.appendChild(feed);
+}
+function selFilter(label,opts,val,cb){
+  const wrap=document.createElement("div");wrap.style.cssText="display:flex;align-items:center;gap:6px";
+  const lab=document.createElement("span");lab.style.cssText="font-weight:800;font-size:12px;color:#5d7780;text-transform:uppercase";lab.textContent=label;
+  const sel=document.createElement("select");sel.style.cssText="padding:8px 12px;border:1px solid #dce8ea;border-radius:10px;font-family:inherit;font-weight:800;font-size:13px;color:#16323a;background:#fff";
+  opts.forEach(o=>{const op=document.createElement("option");op.value=o;op.textContent=o==="all"?"All":o;if(o===val)op.selected=true;sel.appendChild(op);});
+  sel.onchange=()=>cb(sel.value);wrap.appendChild(lab);wrap.appendChild(sel);return wrap;
+}
+function B_implications(v){
+  v.innerHTML=head("Implications","Observation, then recommended consideration. Highest priority first.");
+  const order={high:0,med:1,low:2};
+  const imps=[...DATA.competitor.implications].sort((a,b)=>order[a.priority]-order[b.priority]);
+  imps.forEach(x=>{const d=document.createElement("div");d.className="imp";d.setAttribute("data-s",sx(x.observation+" "+x.consider));
+    d.innerHTML='<span class="pr '+x.priority+'">'+x.priority+' priority</span>'+
+      '<div class="ob">'+x.observation+'</div><div class="co">'+x.consider+'</div>';v.appendChild(d);});
+}
+
+/* ================= MODE C ================= */
+function C_roadmap(v){
+  v.innerHTML=head("Roadmap","The path to a FY30 listing, in four phases.");
+  const wrap=document.createElement("div");wrap.className="road";
+  DATA.ipo.roadmap.forEach(r=>{wrap.innerHTML+='<div class="mile" data-s="'+sx(r.year+" "+r.phase+" "+r.desc)+'">'+
+    '<div class="yr">'+r.year+'</div><div class="ph">'+r.phase+'</div><div class="ds">'+r.desc+'</div></div>';});
+  v.appendChild(wrap);
+}
+function C_financial(v){ metricPane(v,"Financial readiness","Each metric against the benchmark recent peers cleared at listing. Enter Mylo's figure to fill the bar.",DATA.ipo.financial); }
+function C_growth(v){ metricPane(v,"Growth quality","The quality-of-growth bar investors will test. Enter Mylo's figure to fill the bar.",DATA.ipo.growth); }
+function metricPane(v,title,sub,arr){
+  v.innerHTML=head(title,sub);
+  const saved=jget("mylo_ci_ipo",{});
+  const list=document.createElement("div");list.className="metrics";
+  arr.forEach(mt=>{
+    const val=(saved[mt.key]!=null)?saved[mt.key]:mt.mylo_value;
+    let fillPct=0,fillTxt="set Mylo value";
+    if(val!=null&&!isNaN(val)){
+      if(mt.lowerBetter){fillPct=val<=mt.bar?100:Math.max(0,Math.min(100,mt.bar/val*100));}
+      else{fillPct=Math.max(0,Math.min(100,val/mt.bar*100));}
+      fillTxt=Math.round(fillPct)+"% to bar";
+    }
+    const m=document.createElement("div");m.className="metric";m.setAttribute("data-s",sx(mt.name+" "+mt.sub));
+    m.innerHTML='<div class="mtop"><div><span class="mname">'+mt.name+'</span>'+(mt.sub?' <span class="msub">'+mt.sub+'</span>':'')+'</div>'+
+      '<span class="bench">Bar: '+mt.barLbl+'</span></div>'+
+      '<div class="mbar"><div class="mtrack"><div class="mfill" data-w="'+fillPct.toFixed(0)+'%"></div></div>'+
+      '<div class="minput"><input type="number" step="any" data-k="'+mt.key+'" value="'+(val!=null?val:"")+'" placeholder="Mylo"><span class="u">'+mt.unit+'</span></div></div>'+
+      '<div class="msub" style="margin-top:7px" id="ft_'+mt.key+'">'+fillTxt+(mt.lowerBetter?" · lower is better":"")+'</div>';
+    list.appendChild(m);
+  });
+  v.appendChild(list);
+  v.querySelectorAll("input[data-k]").forEach(inp=>{
+    inp.addEventListener("input",()=>{const k=inp.getAttribute("data-k");const s=jget("mylo_ci_ipo",{});
+      s[k]=inp.value===""?null:parseFloat(inp.value);jset("mylo_ci_ipo",s);
+      const mt=arr.find(x=>x.key===k);const val=s[k];let fp=0,txt="set Mylo value";
+      if(val!=null&&!isNaN(val)){if(mt.lowerBetter)fp=val<=mt.bar?100:Math.max(0,Math.min(100,mt.bar/val*100));else fp=Math.max(0,Math.min(100,val/mt.bar*100));txt=Math.round(fp)+"% to bar";}
+      const fill=inp.closest(".metric").querySelector(".mfill");fill.style.width=fp.toFixed(0)+"%";
+      document.getElementById("ft_"+k).textContent=txt+(mt.lowerBetter?" · lower is better":"");
+    });
+  });
+}
+function C_governance(v){
+  v.innerHTML=head("Governance","Toggle each item: not started, in progress, done. Saves to this browser.");
+  const saved=jget("mylo_ci_gov",{});
+  const list=document.createElement("div");list.className="govlist";
+  DATA.ipo.governance.forEach((g,i)=>{
+    const st=saved[g.name]||g.state||"todo";
+    const row=document.createElement("div");row.className="gov";row.setAttribute("data-s",sx(g.name));
+    row.innerHTML='<div class="gn">'+g.name+'</div><div class="gtoggle">'+
+      gopt(i,"todo","Not started",st)+gopt(i,"prog","In progress",st)+gopt(i,"done","Done",st)+'</div>';
+    list.appendChild(row);
+  });
+  v.appendChild(list);
+  v.querySelectorAll(".gopt").forEach(btn=>{btn.onclick=()=>{
+    const name=DATA.ipo.governance[btn.getAttribute("data-i")].name;const state=btn.getAttribute("data-state");
+    const s=jget("mylo_ci_gov",{});s[name]=state;jset("mylo_ci_gov",s);
+    [...btn.parentElement.children].forEach(b=>{const on=b.getAttribute("data-state")===state;
+      b.className="gopt"+(on?" on-"+state:"");});
+  };});
+}
+function gopt(i,state,label,cur){const on=cur===state;return '<button class="gopt'+(on?" on-"+state:"")+'" data-i="'+i+'" data-state="'+state+'">'+label+'</button>';}
+
+/* ---------- search ---------- */
+function sx(s){return (s||"").toLowerCase().replace(/"/g,"");}
+function applySearch(){
+  const q=(document.getElementById("search").value||"").trim().toLowerCase();
+  const items=document.querySelectorAll("[data-s]");
+  items.forEach(el=>{const hit=!q||el.getAttribute("data-s").indexOf(q)>-1;
+    el.style.display=hit?"":"none";});
+  // table rows already toggle; ensure empty messaging not duplicated (kept simple)
+}
+
+/* ---------- wire up ---------- */
+document.querySelectorAll(".card").forEach(c=>c.addEventListener("click",()=>openMode(c.getAttribute("data-mode"))));
+document.getElementById("homeBtn").addEventListener("click",goHome);
+document.getElementById("search").addEventListener("input",applySearch);
+// landing card entrance
+window.addEventListener("load",()=>{setTimeout(()=>document.querySelectorAll(".card").forEach(c=>c.classList.add("in")),120);});
+boot();
+</script>
+</body>
+</html>
