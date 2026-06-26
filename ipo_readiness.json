@@ -1,0 +1,51 @@
+{
+  "updated": "2026-06-26",
+  "target_window": "FY30",
+  "note": "mylo_value fields are owned only by the quarterly MIS routine (Skill 3) and start null until the first MIS is read. bar is the benchmark target. lowerBetter true means a smaller number is better. state: todo | prog | done.",
+  "roadmap": [
+    {"year":"FY27","phase":"Foundation",
+     "desc":"Reach contribution (CM3) and EBITDA positive. Lock the monthly close and MIS cadence. Clean up the cap table and ESOP pool early."},
+    {"year":"FY28","phase":"Scale & economics",
+     "desc":"Compound revenue at 25%+ with rising gross and EBITDA margins. Prove M1 repeat and LTV to CAC at scale. Diversify channels beyond performance marketing."},
+    {"year":"FY29","phase":"Governance",
+     "desc":"Seat a majority-independent board, complete related-party cleanup, and build a three-year Big-4 audited track record. Stand up a DRHP-grade data room."},
+    {"year":"FY30","phase":"Listing",
+     "desc":"List with PAT positive and a clean governance and disclosure record, in line with how Lenskart, Honasa, Wakefit and BlueStone came to market."}
+  ],
+  "financial": [
+    {"key":"rev","name":"Revenue run-rate","unit":"INR cr","sub":"annual",
+     "bar":1500,"barLbl":"1,000 to 2,400 cr","mylo_value":null,"lowerBetter":false},
+    {"key":"growth","name":"Revenue growth","unit":"%","sub":"YoY, sustained",
+     "bar":25,"barLbl":"25%+ sustained","mylo_value":null,"lowerBetter":false},
+    {"key":"gm","name":"Gross margin","unit":"%","sub":"",
+     "bar":60,"barLbl":"55 to 70%","mylo_value":null,"lowerBetter":false},
+    {"key":"ebitda","name":"EBITDA margin","unit":"%","sub":"and rising",
+     "bar":10,"barLbl":"10%+ and rising","mylo_value":null,"lowerBetter":false},
+    {"key":"pat","name":"PAT margin","unit":"%","sub":"the hard bar",
+     "bar":1,"barLbl":"positive at listing","mylo_value":null,"lowerBetter":false},
+    {"key":"ocf","name":"Operating cash flow","unit":"INR cr","sub":"annual",
+     "bar":1,"barLbl":"positive","mylo_value":null,"lowerBetter":false}
+  ],
+  "growth": [
+    {"key":"mau","name":"Monthly active users","unit":"lakh","sub":"",
+     "bar":50,"barLbl":"scaled and growing","mylo_value":null,"lowerBetter":false},
+    {"key":"repeat","name":"M1 repeat rate","unit":"%","sub":"",
+     "bar":40,"barLbl":"40%+","mylo_value":null,"lowerBetter":false},
+    {"key":"aov","name":"Average order value","unit":"INR","sub":"",
+     "bar":700,"barLbl":"stable or rising","mylo_value":null,"lowerBetter":false},
+    {"key":"ltvcac","name":"LTV to CAC","unit":"x","sub":"",
+     "bar":3,"barLbl":"3x+","mylo_value":null,"lowerBetter":false},
+    {"key":"mktg","name":"Marketing as share of revenue","unit":"%","sub":"falling",
+     "bar":30,"barLbl":"under 30% and falling","mylo_value":null,"lowerBetter":true},
+    {"key":"channel","name":"Channel diversification","unit":"%","sub":"non-performance share",
+     "bar":40,"barLbl":"balanced mix","mylo_value":null,"lowerBetter":false}
+  ],
+  "governance": [
+    {"name":"Big-4 audited, 3-year clean track record","state":"todo"},
+    {"name":"Majority-independent board","state":"todo"},
+    {"name":"Clean cap table and rationalised ESOP pool","state":"todo"},
+    {"name":"Related-party transactions cleaned up","state":"todo"},
+    {"name":"Monthly close and MIS maturity","state":"todo"},
+    {"name":"DRHP-grade data room","state":"todo"}
+  ]
+}

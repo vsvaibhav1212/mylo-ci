@@ -1,0 +1,31 @@
+{
+  "updated": "2026-06-26",
+  "next_refresh": "mid-Aug 2026, post Q1 FY27 results",
+  "note": "All money in INR crore. price and issue in INR. growth and pat are latest reported full-year (FY26). fromHigh is percent below the trailing 52-week high. cohort: peer | d2c | platform.",
+  "brands": [
+    {"name":"FirstCry","tick":"FIRSTCRY","cat":"Baby, kids & maternity","listed":"Aug 2024",
+     "cohort":"peer","price":223,"mcap":11825,"rev":8548,"growth":11.6,"pat":-204,
+     "fromHigh":-49,"issue":465,"source":"FY26 results; price/mcap 25 Jun 2026 (Groww/Tickertape)"},
+    {"name":"Honasa (Mamaearth)","tick":"HONASA","cat":"Personal & baby care","listed":"Nov 2023",
+     "cohort":"peer","price":416,"mcap":13561,"rev":2392,"growth":15.7,"pat":200,
+     "fromHigh":-5,"issue":324,"source":"FY26 results; price/mcap 24-25 Jun 2026 (Groww/Screener)"},
+    {"name":"Nykaa","tick":"NYKAA","cat":"Beauty & fashion platform","listed":"Nov 2021",
+     "cohort":"peer","price":309,"mcap":86788,"rev":10022,"growth":26,"pat":204,
+     "fromHigh":0,"issue":188,"source":"FY26 results; price/mcap 24 Jun 2026 (Groww). Issue 188 is bonus-adjusted (IPO 1125, 1:5 bonus Nov 2022)"},
+    {"name":"Lenskart","tick":"LENSKART","cat":"Eyewear D2C & retail","listed":"Nov 2025",
+     "cohort":"d2c","price":509,"mcap":88483,"rev":8988,"growth":28,"pat":501,
+     "fromHigh":null,"issue":402,"source":"FY26 results; price/mcap 25 Jun 2026 (Groww/Screener). 52-wk high not yet clean (listed Nov 2025)"},
+    {"name":"Wakefit","tick":"WAKEFIT","cat":"Home & mattress D2C","listed":"Dec 2025",
+     "cohort":"d2c","price":120,"mcap":4043,"rev":1489,"growth":16.9,"pat":189,
+     "fromHigh":-47,"issue":195,"source":"FY26 results; price/mcap 24-25 Jun 2026 (Tickertape/Screener)"},
+    {"name":"BlueStone","tick":"BLUESTONE","cat":"Jewellery D2C & retail","listed":"Aug 2025",
+     "cohort":"d2c","price":533,"mcap":8116,"rev":2441,"growth":38,"pat":26,
+     "fromHigh":-33,"issue":517,"source":"FY26 results; price 26 Jun 2026 / mcap 25 Jun 2026 (Groww/ICICI Direct)"},
+    {"name":"Urban Company","tick":"URBANCO","cat":"Home services platform","listed":"Sep 2025",
+     "cohort":"platform","price":133,"mcap":21125,"rev":1556,"growth":36,"pat":-235,
+     "fromHigh":-34,"issue":103,"source":"FY26 results; price 23 Jun 2026 / mcap Mar 2026 (Groww/scanx)"},
+    {"name":"Meesho","tick":"MEESHO","cat":"Value e-commerce platform","listed":"Dec 2025",
+     "cohort":"platform","price":188,"mcap":86334,"rev":12626,"growth":34.5,"pat":-1358,
+     "fromHigh":-26,"issue":111,"source":"FY26 results; price/mcap 27 May 2026 (Indmoney/Bajaj). FY26 loss includes one-time reorganisation costs"}
+  ]
+}
